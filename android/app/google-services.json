@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1034129513889",
+    "project_id": "application-c6306",
+    "storage_bucket": "application-c6306.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1034129513889:android:7db7e22020bce30f3a7fe0",
+        "android_client_info": {
+          "package_name": "com.kizilyigit.applicationc6306"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCByn98BEnxmyBdVHxFN5atQ9MuWe1h1_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
