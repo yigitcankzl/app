@@ -14,7 +14,7 @@ class MyAppView extends StatelessWidget {
 			title: 'Firebase Auth',
 			theme: ThemeData(
 				colorScheme: const ColorScheme.light(
-          background: Colors.white,
+          background: Colors.blue,
           onBackground: Colors.black,
           primary: Color.fromRGBO(206, 147, 216, 1),
           onPrimary: Colors.black,

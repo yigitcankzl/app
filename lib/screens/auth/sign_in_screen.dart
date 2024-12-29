@@ -20,30 +20,30 @@ class _SignInScreenState extends State<SignInScreen> {
 	bool obscurePassword = true;
 	String? _errorMsg;
 
-  
-  @override
+    
+    @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey, // Form widget'e _formKey atanıyor.
       child: Column(
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width *0.9,
+            width: MediaQuery.of(context).size.width * 0.9,
             child: MyTextField(
               controller: emailController,
               hintText: 'Email',
               obscureText: false,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(CupertinoIcons.mail_solid),
-              errorMsg: _errorMsg,
               validator: (val) {
-                if (val!.isEmpty) {
+                if (val == null || val.isEmpty) {
                   return 'Please fill in this field';
                 } else if (!RegExp(r'^[\w-\.]+@([\w-]+.)+[\w-]{2,4}$').hasMatch(val)) {
                   return 'Please enter a valid email';
                 }
                 return null;
-              }
-            )
+              },
+            ),
           ),
           const SizedBox(height: 10),
           SizedBox(
@@ -54,9 +54,8 @@ class _SignInScreenState extends State<SignInScreen> {
               obscureText: obscurePassword,
               keyboardType: TextInputType.visiblePassword,
               prefixIcon: const Icon(CupertinoIcons.lock_fill),
-              errorMsg: _errorMsg,
               validator: (val) {
-                if (val!.isEmpty) {
+                if (val == null || val.isEmpty) {
                   return 'Please fill in this field';
                 } else if (!RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~`)\%\-(_+=;:,.<>/?"[{\]}\|^]).{8,}$').hasMatch(val)) {
                   return 'Please enter a valid password';
@@ -67,11 +66,9 @@ class _SignInScreenState extends State<SignInScreen> {
                 onPressed: () {
                   setState(() {
                     obscurePassword = !obscurePassword;
-                    if(obscurePassword) {
-                      iconPassword = CupertinoIcons.eye_fill;
-                    } else {
-                      iconPassword = CupertinoIcons.eye_slash_fill;
-                    }
+                    iconPassword = obscurePassword
+                        ? CupertinoIcons.eye_fill
+                        : CupertinoIcons.eye_slash_fill;
                   });
                 },
                 icon: Icon(iconPassword),
@@ -80,40 +77,45 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
           const SizedBox(height: 20),
           !signInRequired
-            ? SizedBox(
-                width: MediaQuery.of(context).size.width * 0.5,
-                child: TextButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      context.read<SignInBloc>().add(SignInRequired(
-                        emailController.text,
-                        passwordController.text)
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    elevation: 3.0,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(60)
-                    )
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-                    child: Text(
-                      'Sign In',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600
+              ? SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: TextButton(
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        setState(() {
+                          signInRequired = true;
+                        });
+                        context.read<SignInBloc>().add(
+                              SignInRequired(
+                                emailController.text,
+                                passwordController.text,
+                              ),
+                            );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      elevation: 3.0,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(60),
                       ),
                     ),
-                  )
-                ),
-              )
-          : const CircularProgressIndicator(),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+                      child: Text(
+                        'Sign In',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : const CircularProgressIndicator(),
         ],
       ),
     );
