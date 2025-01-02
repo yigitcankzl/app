@@ -18,7 +18,6 @@ class _SignInScreenState extends State<SignInScreen> {
 	bool signInRequired = false;
 	IconData iconPassword = CupertinoIcons.eye_fill;
 	bool obscurePassword = true;
-	String? _errorMsg;
 
     
     @override
