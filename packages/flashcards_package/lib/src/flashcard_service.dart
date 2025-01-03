@@ -52,4 +52,60 @@ class FlashcardsService {
       },
     );
   }
+
+  void addGroup(
+  BuildContext context,
+  List<FlashcardGroup> groups,
+  Function onSave,
+) {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Add Group'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Group Name'),
+            ),
+            TextField(
+              controller: descriptionController,
+              decoration: InputDecoration(labelText: 'Group Description'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty &&
+                  descriptionController.text.isNotEmpty) {
+                groups.add(FlashcardGroup(
+                  name: nameController.text,
+                  description: descriptionController.text,
+                ));
+                onSave();
+                Navigator.pop(context);
+              }
+            },
+            child: Text('Save'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+
 }

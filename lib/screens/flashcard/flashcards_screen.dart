@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flashcards_repo/flashcards_package.dart';
-import 'package:flashcards_repo/src/flashcard_service.dart';
 
 
 class FlashcardsScreen extends StatefulWidget {
@@ -9,7 +8,7 @@ class FlashcardsScreen extends StatefulWidget {
 }
 
 class _FlashcardsScreenState extends State<FlashcardsScreen> {
-  final List<FlashcardGroup> groups = [
+  List<FlashcardGroup> groups = [
     FlashcardGroup(name: 'Group 1', description: 'Description of Group 1'),
     FlashcardGroup(name: 'Group 2', description: 'Description of Group 2'),
     FlashcardGroup(name: 'Group 3', description: 'Description of Group 3'),
@@ -116,7 +115,13 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                // Grup ekleme işlemi
+                _flashcardsService.addGroup(
+                  context,
+                  groups,
+                  () {
+                    setState(() {});
+                  },
+                );
               },
               child: Text('Add Group'),
             ),
