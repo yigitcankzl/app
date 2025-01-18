@@ -1,1 +1,1 @@
-export 'flashcard_group.dart';
+export 'flashcards_group.dart';

@@ -1,56 +1,30 @@
+import 'package:app/screens/flashcard/flashcard_review_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcards_repo/flashcards_package.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-
-class FlashcardsScreen extends StatefulWidget {
-  @override
-  _FlashcardsScreenState createState() => _FlashcardsScreenState();
-}
-
-class _FlashcardsScreenState extends State<FlashcardsScreen> {
-  List<FlashcardGroup> groups = [
-    FlashcardGroup(name: 'Group 1', description: 'Description of Group 1'),
-    FlashcardGroup(name: 'Group 2', description: 'Description of Group 2'),
-    FlashcardGroup(name: 'Group 3', description: 'Description of Group 3'),
-    FlashcardGroup(name: 'Group 4', description: 'Description of Group 4'),
-    FlashcardGroup(name: 'Group 5', description: 'Description of Group 5'),
-    FlashcardGroup(name: 'Group 6', description: 'Description of Group 6'),
-    FlashcardGroup(name: 'Group 7', description: 'Description of Group 7'),
-    FlashcardGroup(name: 'Group 8', description: 'Description of Group 8'),
-    FlashcardGroup(name: 'Group 9', description: 'Description of Group 9'),
-    FlashcardGroup(name: 'Group 10', description: 'Description of Group 10'),
-  ];
-  
+class FlashcardsScreen extends StatelessWidget {
   final FlashcardsService _flashcardsService = FlashcardsService();
 
   @override
   Widget build(BuildContext context) {
+    // Firebase kullanıcı bilgilerini alıyoruz
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+
     return Scaffold(
       appBar: AppBar(title: Text('Flashcard Set')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Tüm gruplar için Review işlemi
-                  },
-                  child: Text('Review All'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Tüm gruplar için Practice işlemi
-                  },
-                  child: Text('Practice All'),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
+      body: StreamBuilder<List<FlashcardGroup>>(
+        stream: _flashcardsService.getFlashcardGroupsStream(userId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No groups found'));
+          } else {
+            List<FlashcardGroup> groups = snapshot.data!;
+            return ListView.builder(
               itemCount: groups.length,
               itemBuilder: (context, index) {
                 return Card(
@@ -64,7 +38,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              groups[index].name!,
+                              groups[index].name,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -75,11 +49,10 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
                               onPressed: () {
                                 _flashcardsService.editGroup(
                                   context,
+                                  userId,
                                   index,
                                   groups,
-                                  () {
-                                    setState(() {}); 
-                                  },
+                                  () {},
                                 );
                               },
                             ),
@@ -87,13 +60,21 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          groups[index].description!,
+                          groups[index].description,
                           style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                         ),
                         SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            // Review işlemi
+                            // Navigate to the Review page
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ReviewScreen(
+                                  flashcardGroup: groups[index], // Pass the selected group to the review page
+                                ),
+                              ),
+                            );
                           },
                           child: Text('Review'),
                         ),
@@ -109,26 +90,21 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
                   ),
                 );
               },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                _flashcardsService.addGroup(
-                  context,
-                  groups,
-                  () {
-                    setState(() {});
-                  },
-                );
-              },
-              child: Text('Add Group'),
-            ),
-          ),
-        ],
+            );
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _flashcardsService.addGroup(
+            context,
+            userId,
+            [],
+            () {},
+          );
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
 }
-
