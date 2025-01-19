@@ -28,21 +28,22 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     if (userId != null) {
       FirebaseFirestore.instance
-          .collection('users')  // Kullanıcı koleksiyonu
-          .doc(userId)  // Kullanıcı kimliği ile belge
-          .collection('flashcard_groups')  // Flashcard grupları koleksiyonu
-          .doc(widget.flashcardGroup.id)  // Flashcard group ID'sine göre belge
-          .collection('flashcards')  // Flashcard'lar koleksiyonu
-          .get()  // Tüm flashcard'ları al
+          .collection('users')
+          .doc(userId)
+          .collection('flashcard_groups')
+          .doc(widget.flashcardGroup.id)
+          .collection('flashcards')
+          .get()
           .then((snapshot) {
         List<Flashcard> loadedFlashcards = [];
         for (var doc in snapshot.docs) {
           loadedFlashcards.add(
             Flashcard(
-              id: doc.id,  // Assuming you have an ID field for each flashcard
+              id: doc.id,
               word: doc['word'],
               meaning: doc['meaning'],
               status: doc['status'],
+              isFavorite: doc['isFavorite'], // Fetch the isFavorite status
             ),
           );
         }
@@ -56,6 +57,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
       print('User is not logged in');
     }
   }
+
 
   void _deleteFlashcard(Flashcard flashcard, int index) {
     setState(() {
@@ -77,7 +79,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   void _toggleFavorite(Flashcard flashcard, int index) {
     setState(() {
-      flashcard.isFavorite = !flashcard.isFavorite;  // Toggle the favorite status
+      flashcard.isFavorite = !flashcard.isFavorite;
     });
 
     FirebaseFirestore.instance
@@ -87,7 +89,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         .doc(widget.flashcardGroup.id)
         .collection('flashcards')
         .doc(flashcard.id)
-        .update({'isFavorite': flashcard.isFavorite})  // Update Firestore
+        .update({'isFavorite': flashcard.isFavorite})
         .catchError((error) {
       print('Error updating favorite status: $error');
     });
@@ -102,18 +104,25 @@ class _ReviewScreenState extends State<ReviewScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Flashcard'),
+          backgroundColor: Colors.deepPurple[100],
+          title: Text('Edit Flashcard', style: TextStyle(color: Colors.deepPurple[900])),
           content: Form(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
                   controller: _wordController,
-                  decoration: InputDecoration(labelText: 'Word'),
+                  decoration: InputDecoration(
+                    labelText: 'Word',
+                    labelStyle: TextStyle(color: Colors.deepPurple[800]),
+                  ),
                 ),
                 TextFormField(
                   controller: _meaningController,
-                  decoration: InputDecoration(labelText: 'Meaning'),
+                  decoration: InputDecoration(
+                    labelText: 'Meaning',
+                    labelStyle: TextStyle(color: Colors.deepPurple[800]),
+                  ),
                 ),
               ],
             ),
@@ -121,11 +130,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);  // Close the dialog
+                Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Colors.deepPurple[900])),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
               onPressed: () {
                 setState(() {
                   flashcard.word = _wordController.text.trim();
@@ -150,7 +160,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       print('Error updating flashcard: $error');
                     });
               },
-              child: Text('Update'),
+              child: Text('Update', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -159,20 +169,26 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   void _startPractice() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => PracticeScreen(
-        flashcardGroup: widget.flashcardGroup,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PracticeScreen(
+          flashcardGroup: widget.flashcardGroup,
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.flashcardGroup.name} Review')),
+      appBar: AppBar(
+        backgroundColor: Colors.deepPurple,
+        title: Text(
+          '${widget.flashcardGroup.name} Review',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -194,56 +210,54 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 Color statusColor = flashcard.status == 'memorized' ? Colors.green : Colors.red;
 
                 return Card(
+                  color: Colors.deepPurple[50],
                   margin: EdgeInsets.all(8),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
                       children: [
-                        // Memorized status on the left side, filling the height of the card
                         Container(
-                          width: 8, // Set a fixed width for the status indicator
-                          height: 60, // Set the height based on the card's height
+                          width: 8,
+                          height: 60,
                           color: statusColor,
                         ),
-                        SizedBox(width: 10), // Space between the status and the text
+                        SizedBox(width: 10),
 
-                        // Flashcard word and meaning
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               flashcard.word,
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple[900]),
                             ),
                             SizedBox(height: 8),
                             Text(
                               flashcard.meaning,
-                              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                              style: TextStyle(fontSize: 16, color: Colors.deepPurple[700]),
                             ),
                           ],
                         ),
 
-                        // Right side icons (Favorite, Edit, Delete)
                         Spacer(),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
-                              icon: Icon(flashcard.isFavorite ? Icons.favorite : Icons.favorite_border),
+                              icon: Icon(flashcard.isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.deepPurple),
                               onPressed: () {
-                                _toggleFavorite(flashcard, index);  // Toggle favorite status
+                                _toggleFavorite(flashcard, index);
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.edit),
+                              icon: Icon(Icons.edit, color: Colors.deepPurple),
                               onPressed: () {
-                                _showEditDialog(flashcard, index);  // Show edit dialog
+                                _showEditDialog(flashcard, index);
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.delete),
+                              icon: Icon(Icons.delete, color: Colors.deepPurple),
                               onPressed: () {
-                                _deleteFlashcard(flashcard, index);  // Delete flashcard
+                                _deleteFlashcard(flashcard, index);
                               },
                             ),
                           ],
@@ -261,6 +275,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -269,18 +284,27 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           flashcardGroup: widget.flashcardGroup,
                           onFlashcardAdded: () {
                             setState(() {
-                              // Update UI after adding a new flashcard
+                              _loadFlashcards(); // Reload flashcards from Firebase
                             });
+                            // Optional: Show success message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Flashcard added successfully!'),
+                                backgroundColor: Colors.green,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
                           },
                         );
                       },
                     );
                   },
-                  child: Text('Add Card'),
+                  child: Text('Add Card', style: TextStyle(color: Colors.white)),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
                   onPressed: _startPractice,
-                  child: Text('Practice'),
+                  child: Text('Practice', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -314,47 +338,73 @@ class _AddCardDialogState extends State<AddCardDialog> {
     super.dispose();
   }
 
-  void _addFlashcard() {
+  void _addFlashcard() async {
     if (_formKey.currentState?.validate() ?? false) {
       String word = _wordController.text.trim();
       String meaning = _meaningController.text.trim();
 
       if (userId != null) {
-        Flashcard newFlashcard = Flashcard(
-          word: word,
-          meaning: meaning,
-          status: 'not memorized',
-        );
+        try {
+          // First, create a new document reference
+          DocumentReference flashcardRef = FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .collection('flashcard_groups')
+              .doc(widget.flashcardGroup.id)
+              .collection('flashcards')
+              .doc();
 
-        setState(() {
-          widget.flashcardGroup.flashcards.add(newFlashcard);
-        });
+          // Create a new Flashcard object with the generated ID
+          Flashcard newFlashcard = Flashcard(
+            id: flashcardRef.id, // Use the generated document ID
+            word: word,
+            meaning: meaning,
+            status: 'not memorized',
+            isFavorite: false,
+          );
 
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .collection('flashcard_groups')
-            .doc(widget.flashcardGroup.id)
-            .collection('flashcards')
-            .add({
-          'word': word,
-          'meaning': meaning,
-          'status': 'not memorized',
-          'groupId': widget.flashcardGroup.id,
-          'userId': userId,
-        }).then((_) {
+          // Save to Firebase
+          await flashcardRef.set({
+            'id': flashcardRef.id,
+            'word': word,
+            'meaning': meaning,
+            'status': 'not memorized',
+            'isFavorite': false,
+            'groupId': widget.flashcardGroup.id,
+            'userId': userId,
+          });
+
+          // Update local state
+          setState(() {
+            widget.flashcardGroup.flashcards.add(newFlashcard);
+          });
+
+          // Call the callback to update parent widget
           widget.onFlashcardAdded();
+          
+          // Close the dialog
           Navigator.pop(context);
-        }).catchError((error) {
+        } catch (error) {
           print('Error adding flashcard: $error');
-        });
+          // Optionally show error message to user
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error adding flashcard. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } else {
         print('User is not logged in');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please log in to add flashcards.'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {

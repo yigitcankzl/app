@@ -27,6 +27,7 @@ class Flashcard {
       meaning: data['meaning'] ?? '',
       status: data['status'] ?? 'not memorized', // Default status if not provided
       groupId: data['groupId'], // Can be null if not provided
+      isFavorite: data['isFavorite'],
     );
   }
 
@@ -37,6 +38,7 @@ class Flashcard {
       'meaning': meaning,
       'status': status,
       'groupId': groupId,
+      'isFavorite' : isFavorite,
     };
   }
 
@@ -54,6 +56,8 @@ class Flashcard {
             'meaning': meaning,
             'status': status,
             'groupId': groupId,
+            'isFavorite' : isFavorite,
+
           });
     } catch (e) {
       print('Error saving flashcard: $e');
