@@ -3,24 +3,22 @@ import 'package:flashcards_repo/flashcards_package.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FlashcardsService {
-  // Kullanıcıya özel flashcard gruplarını dinler ve UI'yi günceller
   Stream<List<FlashcardGroup>> getFlashcardGroupsStream(String userId) {
     return FirebaseFirestore.instance
-        .collection('users')  // Kullanıcıya özel koleksiyon
+        .collection('users') 
         .doc(userId)
-        .collection('flashcard_groups')  // Kullanıcıya özel flashcard grupları
+        .collection('flashcard_groups')  
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
-        return FlashcardGroup.fromFirestore(doc.data(), doc.id); // doc.id ile belge kimliği ekleniyor
+        return FlashcardGroup.fromFirestore(doc.data(), doc.id);
       }).toList();
     });
   }
 
-  // Kullanıcıya özel grup düzenleme işlemi
   void editGroup(
     BuildContext context,
-    String userId,  // userId parametresi ekleniyor
+    String userId,  
     int index,
     List<FlashcardGroup> groups,
     Function onSave,
@@ -48,17 +46,22 @@ class FlashcardsService {
           ),
           actions: [
             TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
               onPressed: () async {
                 String updatedName = nameController.text;
                 String updatedDescription = descriptionController.text;
 
                 if (updatedName.isNotEmpty && updatedDescription.isNotEmpty) {
-                  // Kullanıcıya özel flashcard grubunu güncelleme
                   await FirebaseFirestore.instance
                       .collection('users')
-                      .doc(userId)  // Kullanıcı ID'sine göre işlem yapılıyor
+                      .doc(userId) 
                       .collection('flashcard_groups')
-                      .doc(groups[index].id)  // Belge ID ile güncelleme
+                      .doc(groups[index].id) 
                       .update({
                     'name': updatedName,
                     'description': updatedDescription,
@@ -72,22 +75,15 @@ class FlashcardsService {
               },
               child: Text('Save'),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
           ],
         );
       },
     );
   }
 
-  // Kullanıcıya özel yeni grup ekleme
   void addGroup(
     BuildContext context,
-    String userId,  // userId parametresi ekleniyor
+    String userId,  
     List<FlashcardGroup> groups,
     Function onSave,
   ) {
@@ -114,24 +110,28 @@ class FlashcardsService {
           ),
           actions: [
             TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
               onPressed: () async {
                 String groupName = nameController.text;
                 String groupDescription = descriptionController.text;
 
                 if (groupName.isNotEmpty && groupDescription.isNotEmpty) {
-                  // Kullanıcıya özel yeni grup Firestore'a ekleniyor
                   DocumentReference docRef = await FirebaseFirestore.instance
-                      .collection('users')  // Kullanıcıya özel koleksiyon
-                      .doc(userId)  // Kullanıcı ID'si
-                      .collection('flashcard_groups')  // Kullanıcıya özel flashcard grupları
+                      .collection('users')  
+                      .doc(userId)  
+                      .collection('flashcard_groups') 
                       .add({
                     'name': groupName,
                     'description': groupDescription,
                   });
 
-                  // Firestore'dan eklenen grup ID'si alınıyor
                   groups.add(FlashcardGroup(
-                    id: docRef.id,  // ID'si ekleniyor
+                    id: docRef.id,  
                     name: groupName,
                     description: groupDescription,
                   ));
@@ -142,15 +142,25 @@ class FlashcardsService {
               },
               child: Text('Save'),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
           ],
         );
       },
     );
+  }
+
+  void deleteGroup(
+    BuildContext context,
+    String userId, 
+    FlashcardGroup group,  
+    Function onDelete,  
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('flashcard_groups')
+        .doc(group.id)  
+        .delete();
+
+    onDelete();
   }
 }

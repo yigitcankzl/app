@@ -18,11 +18,9 @@ class FlashcardGroup {
     this.notMemorizedCount = 0,
   });
 
-  // Firestore verilerini alarak FlashcardGroup oluşturma
   factory FlashcardGroup.fromFirestore(Map<String, dynamic> data, String documentId) {
     var flashcardsData = data['flashcards'] as List<dynamic>? ?? [];
     
-    // Flashcard verilerini Firestore'dan alıp Flashcard objelerine dönüştürme
     List<Flashcard> flashcards = flashcardsData.map((flashcardData) {
       return Flashcard.fromFirestore(flashcardData, documentId);
     }).toList();
@@ -37,7 +35,6 @@ class FlashcardGroup {
     );
   }
 
-  // Firestore'a kaydetmek için
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
@@ -46,7 +43,6 @@ class FlashcardGroup {
     };
   }
 
-  // Kullanıcıya ait FlashcardGroup oluşturma
   Future<void> addGroupForUser(String userId) async {
     await FirebaseFirestore.instance
         .collection('users')

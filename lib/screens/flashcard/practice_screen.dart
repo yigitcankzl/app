@@ -1,3 +1,4 @@
+import 'package:app/screens/flashcard/flashcard_review_screen.dart';
 import 'package:flashcards_repo/flashcards_package.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcards_repo/src/models/flashcard.dart';
@@ -16,16 +17,14 @@ class PracticeScreen extends StatefulWidget {
 class _PracticeScreenState extends State<PracticeScreen> {
   int currentIndex = 0;
   bool isFront = true;
-  bool isLoading = false; 
+  bool isLoading = false;
 
   void _updateFlashcardInGroup(Flashcard updatedFlashcard) async {
     setState(() {
-      // Loading indicator'ı başlatıyoruz
       isLoading = true;
     });
 
     try {
-      // Firestore'daki flashcard'ı güncelle
       await FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser?.uid)
@@ -39,26 +38,21 @@ class _PracticeScreenState extends State<PracticeScreen> {
             'status': updatedFlashcard.status,
           });
 
-      // Firestore güncellemesi başarılı olduğunda, lokal veriyi de güncelle
       setState(() {
         int index = widget.flashcardGroup.flashcards
             .indexWhere((flashcard) => flashcard.id == updatedFlashcard.id);
         if (index != -1) {
           widget.flashcardGroup.flashcards[index] = updatedFlashcard;
         }
-        // Yükleniyor durumunu kaldırıyoruz
         isLoading = false;
       });
     } catch (error) {
-      // Hata durumunda yükleniyor göstergesi kaldırılır
       setState(() {
         isLoading = false;
       });
       print('Error updating flashcard in Firestore: $error');
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +77,19 @@ class _PracticeScreenState extends State<PracticeScreen> {
       appBar: AppBar(
         title: Text('Practice: ${widget.flashcardGroup.name}'),
         backgroundColor: Colors.deepPurple,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ReviewScreen(
+                  flashcardGroup: widget.flashcardGroup,
+                ),
+              ),
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -101,8 +108,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   onPressed: () {
                     setState(() {
                       if (currentIndex > 0) {
-                        currentIndex--; // Bir önceki karta geçiş
-                        isFront = true; // Ön yüzü göstermek için sıfırla
+                        currentIndex--; 
+                        isFront = true;
                       }
                     });
                   },
@@ -120,10 +127,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   onPressed: () {
                     setState(() {
                       if (currentIndex < widget.flashcardGroup.flashcards.length - 1) {
-                        currentIndex++; // Bir sonraki karta geçiş
-                        isFront = true; // Ön yüzü göstermek için sıfırla
+                        currentIndex++; 
+                        isFront = true; 
                       } else {
-                        Navigator.pop(context); // Son karta ulaşıldığında ana ekrana dön
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ReviewScreen(
+                              flashcardGroup: widget.flashcardGroup,
+                            ),
+                          ),
+                        ); 
                       }
                     });
                   },
@@ -134,7 +148,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
               ],
             ),
 
-            // Flashcard Display
             Expanded(
               child: Center(
                 child: GestureDetector(
@@ -188,15 +201,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                             color: Colors.white,
                           ),
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditFlashcardScreen(
-                                  flashcard: currentFlashcard,
-                                  onSave: _updateFlashcardInGroup,
-                                ),
-                              ),
-                            );
+                            _showEditFlashcardDialog(currentFlashcard);
                           },
                         ),
                       ),
@@ -205,7 +210,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 ),
               ),
             ),  
-            // Action Buttons
             Column(
               children: [
                 SizedBox(height: 8),
@@ -213,7 +217,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: currentFlashcard.status == 'memorized' 
                         ? Colors.green 
-                        : Colors.red, // Duruma göre renk
+                        : Colors.red, 
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -221,7 +225,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   ),
                   onPressed: () {
                     setState(() {
-                      // Durumu tersine çevir
                       currentFlashcard.status = currentFlashcard.status == 'memorized'
                           ? 'not memorized'
                           : 'memorized';
@@ -231,7 +234,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   child: Text(
                     currentFlashcard.status == 'memorized' 
                         ? 'MEMORIZED' 
-                        : 'NOT MEMORIZED', // Duruma göre metin
+                        : 'NOT MEMORIZED', 
                   ),
                 ),
               ],
@@ -254,73 +257,53 @@ class _PracticeScreenState extends State<PracticeScreen> {
       print('Error updating flashcard status: $error');
     });
   }
-}
 
+  void _showEditFlashcardDialog(Flashcard flashcard) {
+    TextEditingController wordController = TextEditingController(text: flashcard.word);
+    TextEditingController meaningController = TextEditingController(text: flashcard.meaning);
 
-class EditFlashcardScreen extends StatefulWidget {
-  final Flashcard flashcard;
-  final Function(Flashcard) onSave;
-
-  EditFlashcardScreen({required this.flashcard, required this.onSave});
-
-  @override
-  _EditFlashcardScreenState createState() => _EditFlashcardScreenState();
-}
-
-class _EditFlashcardScreenState extends State<EditFlashcardScreen> {
-  late TextEditingController _wordController;
-  late TextEditingController _meaningController;
-
-  @override
-  void initState() {
-    super.initState();
-    _wordController = TextEditingController(text: widget.flashcard.word);
-    _meaningController = TextEditingController(text: widget.flashcard.meaning);
-  }
-
-  @override
-  void dispose() {
-    _wordController.dispose();
-    _meaningController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Flashcard'),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _wordController,
-              decoration: InputDecoration(labelText: 'Word'),
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit Flashcard'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: wordController,
+                decoration: InputDecoration(labelText: 'Word'),
+              ),
+              TextField(
+                controller: meaningController,
+                decoration: InputDecoration(labelText: 'Meaning'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
             ),
-            TextField(
-              controller: _meaningController,
-              decoration: InputDecoration(labelText: 'Meaning'),
-            ),
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Flashcard updatedFlashcard = Flashcard(
-                  id: widget.flashcard.id,
-                  word: _wordController.text,
-                  meaning: _meaningController.text,
-                  status: widget.flashcard.status,
+                  id: flashcard.id,
+                  word: wordController.text,
+                  meaning: meaningController.text,
+                  status: flashcard.status,
                 );
-                widget.onSave(updatedFlashcard);
+                _updateFlashcardInGroup(updatedFlashcard);
                 Navigator.pop(context);
               },
-              child: Text('Save Changes'),
+              child: Text('Save'),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
+
 }

@@ -1,9 +1,12 @@
+import 'package:app/screens/flashcard/flashcards_screen.dart';
 import 'package:app/screens/flashcard/practice_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcards_repo/flashcards_package.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcards_repo/src/models/flashcard.dart';
+import 'package:flashcards_repo/src/add_card_dialog.dart';
+
 
 class ReviewScreen extends StatefulWidget {
   final FlashcardGroup flashcardGroup;
@@ -188,6 +191,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
           '${widget.flashcardGroup.name} Review',
           style: TextStyle(color: Colors.white),
         ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FlashcardsScreen()),
+              );
+          },
+        ),
       ),
       body: Column(
         children: [
@@ -311,145 +323,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class AddCardDialog extends StatefulWidget {
-  final FlashcardGroup flashcardGroup;
-  final VoidCallback onFlashcardAdded;
-
-  AddCardDialog({required this.flashcardGroup, required this.onFlashcardAdded});
-
-  @override
-  _AddCardDialogState createState() => _AddCardDialogState();
-}
-
-class _AddCardDialogState extends State<AddCardDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _wordController = TextEditingController();
-  final _meaningController = TextEditingController();
-  String? userId = FirebaseAuth.instance.currentUser?.uid;
-
-  @override
-  void dispose() {
-    _wordController.dispose();
-    _meaningController.dispose();
-    super.dispose();
-  }
-
-  void _addFlashcard() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      String word = _wordController.text.trim();
-      String meaning = _meaningController.text.trim();
-
-      if (userId != null) {
-        try {
-          // First, create a new document reference
-          DocumentReference flashcardRef = FirebaseFirestore.instance
-              .collection('users')
-              .doc(userId)
-              .collection('flashcard_groups')
-              .doc(widget.flashcardGroup.id)
-              .collection('flashcards')
-              .doc();
-
-          // Create a new Flashcard object with the generated ID
-          Flashcard newFlashcard = Flashcard(
-            id: flashcardRef.id, // Use the generated document ID
-            word: word,
-            meaning: meaning,
-            status: 'not memorized',
-            isFavorite: false,
-          );
-
-          // Save to Firebase
-          await flashcardRef.set({
-            'id': flashcardRef.id,
-            'word': word,
-            'meaning': meaning,
-            'status': 'not memorized',
-            'isFavorite': false,
-            'groupId': widget.flashcardGroup.id,
-            'userId': userId,
-          });
-
-          // Update local state
-          setState(() {
-            widget.flashcardGroup.flashcards.add(newFlashcard);
-          });
-
-          // Call the callback to update parent widget
-          widget.onFlashcardAdded();
-          
-          // Close the dialog
-          Navigator.pop(context);
-        } catch (error) {
-          print('Error adding flashcard: $error');
-          // Optionally show error message to user
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error adding flashcard. Please try again.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } else {
-        print('User is not logged in');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Please log in to add flashcards.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Add New Flashcard'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _wordController,
-              decoration: InputDecoration(labelText: 'Word'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a word';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _meaningController,
-              decoration: InputDecoration(labelText: 'Meaning'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a meaning';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);  // Close the dialog
-          },
-          child: Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _addFlashcard,
-          child: Text('Add'),
-        ),
-      ],
     );
   }
 }
