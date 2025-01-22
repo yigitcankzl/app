@@ -1,5 +1,4 @@
 import 'package:app/screens/flashcard/flashcard_review_screen.dart';
-import 'package:app/screens/flashcard/practice_screen.dart';
 import 'package:app/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcards_repo/flashcards_package.dart';
