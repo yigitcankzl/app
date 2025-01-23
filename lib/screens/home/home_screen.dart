@@ -1,4 +1,5 @@
 import 'package:app/screens/flashcard/flashcards_screen.dart';
+import 'package:app/screens/gemini/gemini_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:app/blocs/sign_in_bloc/sign_in_bloc.dart';
@@ -31,6 +32,15 @@ class HomeScreen extends StatelessWidget {
               );
             },
             child: const Text('Flashcard'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GeminiScreen()), 
+              );
+            },
+            child: const Text('Gemini'), 
           ),
         ],
       ),
