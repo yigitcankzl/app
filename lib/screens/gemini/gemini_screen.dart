@@ -98,7 +98,7 @@ class _GeminiScreenState extends State<GeminiScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: 'Bir şey yazın...',
+                        hintText: 'Talk with AI...',
                         filled: true,
                         fillColor: Colors.grey[100],
                         border: OutlineInputBorder(

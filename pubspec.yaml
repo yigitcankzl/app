@@ -8,6 +8,8 @@ environment:
 
 dependencies:
   google_generative_ai: ^0.4.6
+  flutter_sound: ^9.19.1
+  http: ^1.3.0
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
@@ -21,6 +23,9 @@ dependencies:
 
   gemini_repo:
     path: packages/gemini_package
+
+  lingva_repo:
+    path: packages/lingva_package
 
   flutter_bloc: ^8.1.6
   equatable: ^2.0.7
