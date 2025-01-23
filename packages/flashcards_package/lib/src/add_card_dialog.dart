@@ -69,21 +69,9 @@ class _AddCardDialogState extends State<AddCardDialog> {
           Navigator.pop(context);
         } catch (error) {
           print('Error adding flashcard: $error');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error adding flashcard. Please try again.'),
-              backgroundColor: Colors.red,
-            ),
-          );
         }
       } else {
         print('User is not logged in');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Please log in to add flashcards.'),
-            backgroundColor: Colors.red,
-          ),
-        );
       }
     }
   }

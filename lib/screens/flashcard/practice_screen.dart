@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flashcards_repo/src/models/flashcard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
 
 class PracticeScreen extends StatefulWidget {
   final FlashcardGroup flashcardGroup;
@@ -18,6 +19,31 @@ class _PracticeScreenState extends State<PracticeScreen> {
   int currentIndex = 0;
   bool isFront = true;
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _shuffleFlashcards();
+  }
+
+
+  void _shuffleFlashcards() {
+    setState(() {
+      List<Flashcard> weightedFlashcards = [];
+
+      for (var flashcard in widget.flashcardGroup.flashcards) {
+        if (flashcard.isFavorite) {
+          weightedFlashcards.addAll(List.generate(2, (_) => flashcard));  
+        } else {
+          weightedFlashcards.add(flashcard); 
+        }
+      }
+
+      weightedFlashcards.shuffle(Random());
+      widget.flashcardGroup.flashcards = weightedFlashcards;
+    });
+  }
+
 
   void _updateFlashcardInGroup(Flashcard updatedFlashcard) async {
     setState(() {

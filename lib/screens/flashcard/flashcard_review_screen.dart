@@ -298,14 +298,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                             setState(() {
                               _loadFlashcards(); // Reload flashcards from Firebase
                             });
-                            // Optional: Show success message
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Flashcard added successfully!'),
-                                backgroundColor: Colors.green,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
                           },
                         );
                       },
