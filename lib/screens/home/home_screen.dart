@@ -10,7 +10,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome, you are In!'),
+        title: const Text('updating'),
         actions: [
           IconButton(
             onPressed: () {

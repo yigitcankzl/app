@@ -11,7 +11,7 @@ class MyAppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-			title: 'Firebase Auth',
+			title: 'Turkish',
 			theme: ThemeData(
 				colorScheme: const ColorScheme.light(
           background: Colors.blue,

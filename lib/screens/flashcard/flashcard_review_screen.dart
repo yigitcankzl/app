@@ -26,6 +26,36 @@ class _ReviewScreenState extends State<ReviewScreen> {
     _loadFlashcards();
   }
 
+  void _swapWordMeaning() {
+    setState(() {
+      for (var flashcard in widget.flashcardGroup.flashcards) {
+        String temp = flashcard.word;
+        flashcard.word = flashcard.meaning;
+        flashcard.meaning = temp;
+      }
+    });
+
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      for (var flashcard in widget.flashcardGroup.flashcards) {
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('flashcard_groups')
+            .doc(widget.flashcardGroup.id)
+            .collection('flashcards')
+            .doc(flashcard.id)
+            .update({
+              'word': flashcard.word,
+              'meaning': flashcard.meaning,
+            })
+            .catchError((error) {
+          print('Error updating flashcard: $error');
+        });
+      }
+    }
+  }
+
   void _loadFlashcards() async {
     String? userId = FirebaseAuth.instance.currentUser?.uid;
 
@@ -194,10 +224,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => FlashcardsScreen()),
-              );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FlashcardsScreen()),
+            );
           },
         ),
       ),
@@ -272,6 +302,33 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 _deleteFlashcard(flashcard, index);
                               },
                             ),
+                            // Add Swap button here
+                            IconButton(
+                              icon: Icon(Icons.swap_horiz, color: Colors.deepPurple),
+                              onPressed: () {
+                                setState(() {
+                                  String temp = flashcard.word;
+                                  flashcard.word = flashcard.meaning;
+                                  flashcard.meaning = temp;
+                                });
+
+                                // Update in Firebase as well
+                                FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                                    .collection('flashcard_groups')
+                                    .doc(widget.flashcardGroup.id)
+                                    .collection('flashcards')
+                                    .doc(flashcard.id)
+                                    .update({
+                                      'word': flashcard.word,
+                                      'meaning': flashcard.meaning,
+                                    })
+                                    .catchError((error) {
+                                  print('Error updating flashcard: $error');
+                                });
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -281,6 +338,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               },
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -309,6 +367,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
                   onPressed: _startPractice,
                   child: Text('Practice', style: TextStyle(color: Colors.white)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+                  onPressed: _swapWordMeaning, // Add the swap button
+                  child: Text('Swap Word/Meaning', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
