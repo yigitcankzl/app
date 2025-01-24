@@ -1,5 +1,6 @@
 import 'package:app/screens/flashcard/flashcard_review_screen.dart';
 import 'package:app/screens/home/home_screen.dart';
+import 'package:app/screens/lingva/lingva_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcards_repo/flashcards_package.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,6 +15,14 @@ class FlashcardsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Flashcard Set'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showTranslateSheet(context); 
+            },
+            icon: const Icon(Icons.translate),
+          ),
+        ],
         backgroundColor: Colors.deepPurple, 
                 leading: IconButton(
           icon: Icon(Icons.arrow_back),

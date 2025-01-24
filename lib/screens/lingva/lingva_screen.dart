@@ -1,4 +1,5 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lingva_repo/lingva_package.dart';
 
 class TranslatePanel extends StatefulWidget {
@@ -13,18 +14,18 @@ class _TranslatePanelState extends State<TranslatePanel> {
   String _translatedText = '';
   bool _isLoading = false;
   final TextEditingController _sourceController = TextEditingController();
-  String _sourceLang = 'en'; // Default source language
-  String _targetLang = 'tr'; // Default target language
+  String _sourceLang = 'en';
+  String _targetLang = 'tr';
 
   void _translate() async {
     setState(() {
       _isLoading = true;
-      _translatedText = ''; // Clear previous result
+      _translatedText = '';
     });
 
     try {
       final translated = await _lingvaService.translateText(
-        _sourceLang, _targetLang, _sourceController.text);
+          _sourceLang, _targetLang, _sourceController.text);
       setState(() {
         _translatedText = translated;
       });
@@ -39,37 +40,43 @@ class _TranslatePanelState extends State<TranslatePanel> {
     }
   }
 
+  void _swapLanguages() {
+    setState(() {
+      final temp = _sourceLang;
+      _sourceLang = _targetLang;
+      _targetLang = temp;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Translate Section',
-            style: Theme.of(context).textTheme.titleLarge,
+            'Translate',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
           ),
-          SizedBox(height: 8),
-          TextField(
-            controller: _sourceController,
-            decoration: InputDecoration(
-              labelText: 'Enter text to translate',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: DropdownButton<String>(
+                child: DropdownButtonFormField<String>(
                   value: _sourceLang,
-                  items: <String>['en', 'es', 'fr', 'de', 'it', 'tr'] // Example languages
-                      .map<DropdownMenuItem<String>>((String value) {
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    prefixIcon: Icon(Icons.language, color: Colors.blue),
+                  ),
+                  items: ['en', 'es', 'fr', 'de', 'it', 'tr'].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(value.toUpperCase(), style: TextStyle(fontSize: 14)),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
@@ -79,15 +86,21 @@ class _TranslatePanelState extends State<TranslatePanel> {
                   },
                 ),
               ),
-              Icon(Icons.arrow_forward),
+              IconButton(
+                icon: Icon(Icons.swap_horiz, color: Colors.blueAccent),
+                onPressed: _swapLanguages,
+              ),
               Expanded(
-                child: DropdownButton<String>(
+                child: DropdownButtonFormField<String>(
                   value: _targetLang,
-                  items: <String>['en', 'es', 'fr', 'de', 'it','tr'] // Example languages
-                      .map<DropdownMenuItem<String>>((String value) {
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    prefixIcon: Icon(Icons.translate, color: Colors.green),
+                  ),
+                  items: ['en', 'es', 'fr', 'de', 'it', 'tr'].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(value.toUpperCase(), style: TextStyle(fontSize: 14)),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
@@ -99,19 +112,83 @@ class _TranslatePanelState extends State<TranslatePanel> {
               ),
             ],
           ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _isLoading ? null : _translate,
-            child: _isLoading 
-                ? CircularProgressIndicator(color: Colors.white)
-                : const Text('Translate Now'),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _sourceController,
+                  decoration: InputDecoration(
+                    labelText: 'Enter text',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.edit, color: Colors.blueAccent),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _translate,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: Colors.blueAccent,
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Icon(Icons.send, color: Colors.white),
+              ),
+            ],
           ),
-          SizedBox(height: 16),
-          if (_translatedText.isNotEmpty) 
-            Text(
-              'Translation: $_translatedText',
-              style: Theme.of(context).textTheme.bodyMedium,
+          const SizedBox(height: 16),
+          if (_translatedText.isNotEmpty)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _translatedText,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.copy, color: Colors.blueAccent),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: _translatedText));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Text copied to clipboard')),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
+
         ],
       ),
     );
@@ -121,12 +198,12 @@ class _TranslatePanelState extends State<TranslatePanel> {
 void showTranslateSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
     ),
     isScrollControlled: true,
     builder: (context) {
-      return const TranslatePanel(); // Paneli buradan çağırıyoruz
+      return const TranslatePanel();
     },
   );
 }

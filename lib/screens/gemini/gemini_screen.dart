@@ -1,3 +1,4 @@
+import 'package:app/screens/lingva/lingva_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_repo/gemini_package.dart';
 
@@ -40,6 +41,14 @@ class _GeminiScreenState extends State<GeminiScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gemini Chat'),
+        actions: [          
+          IconButton(
+            onPressed: () {
+              showTranslateSheet(context);
+            },
+            icon: const Icon(Icons.translate),
+          ),
+        ],
         backgroundColor: Colors.deepPurple,
         centerTitle: true,
       ),

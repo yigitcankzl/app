@@ -1,5 +1,6 @@
 import 'package:app/screens/flashcard/flashcards_screen.dart';
 import 'package:app/screens/flashcard/practice_screen.dart';
+import 'package:app/screens/lingva/lingva_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcards_repo/flashcards_package.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -217,6 +218,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
+        actions: [
+          IconButton(
+            onPressed: () {
+              showTranslateSheet(context); 
+            },
+            icon: const Icon(Icons.translate),
+          ),
+        ],
         title: Text(
           '${widget.flashcardGroup.name} Review',
           style: TextStyle(color: Colors.white),
