@@ -8,16 +8,22 @@ class QuizListPage extends StatefulWidget {
 }
 
 class _QuizListPageState extends State<QuizListPage> {
-  void _showAddQuizDialog() {
+  void _showAddQuizBottomSheet() {
     final _titleController = TextEditingController();
     final _descriptionController = TextEditingController();
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Quiz'),
-          content: Column(
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16.0,
+            right: 16.0,
+            top: 20.0,
+          ),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
@@ -28,29 +34,31 @@ class _QuizListPageState extends State<QuizListPage> {
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Quiz Description'),
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      QuizListService.addQuiz(
+                        _titleController.text,
+                        _descriptionController.text,
+                        context,
+                      );
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
+                    child: const Text('Add Your Own'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      //ai sayfasina gidecek
+                    },
+                    child: const Text('Add with ai'),
+                  ),
+                ],
+              ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // Add the quiz
-                QuizListService.addQuiz(
-                  _titleController.text,
-                  _descriptionController.text,
-                  context,
-                );
-                Navigator.pop(context); // Close the dialog
-                setState(() {}); // Update the ListView
-              },
-              child: const Text('Add'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
         );
       },
     );
@@ -81,21 +89,20 @@ class _QuizListPageState extends State<QuizListPage> {
           actions: [
             TextButton(
               onPressed: () {
-                // Update the quiz
                 QuizListService.updateQuiz(
                   index,
                   _titleController.text,
                   _descriptionController.text,
                   context,
                 );
-                Navigator.pop(context); // Close the dialog
-                setState(() {}); // Update the ListView
+                Navigator.pop(context);
+                setState(() {});
               },
               child: const Text('Update'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog
+                Navigator.pop(context);
               },
               child: const Text('Cancel'),
             ),
@@ -115,16 +122,15 @@ class _QuizListPageState extends State<QuizListPage> {
           actions: [
             TextButton(
               onPressed: () {
-                // Delete the quiz
                 QuizListService.deleteQuiz(index, context);
-                Navigator.pop(context); // Close the dialog
-                setState(() {}); // Update the ListView
+                Navigator.pop(context);
+                setState(() {});
               },
               child: const Text('Yes'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog
+                Navigator.pop(context);
               },
               child: const Text('No'),
             ),
@@ -158,13 +164,13 @@ class _QuizListPageState extends State<QuizListPage> {
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
-                    _showEditQuizDialog(index); // Edit quiz
+                    _showEditQuizDialog(index);
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    _showDeleteQuizDialog(index); // Delete quiz
+                    _showDeleteQuizDialog(index);
                   },
                 ),
               ],
@@ -173,7 +179,7 @@ class _QuizListPageState extends State<QuizListPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddQuizDialog, // Open pop-up form
+        onPressed: _showAddQuizBottomSheet,
         child: const Icon(Icons.add),
       ),
     );

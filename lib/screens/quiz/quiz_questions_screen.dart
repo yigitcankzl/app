@@ -1,3 +1,4 @@
+import 'package:app/screens/quiz/add_question_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_repo/quiz_package.dart';
 
@@ -13,8 +14,8 @@ class QuizQuestionPage extends StatefulWidget {
 class _QuizQuestionPageState extends State<QuizQuestionPage> {
   final QuestionService _questionService = QuestionService();
   final TextEditingController _questionController = TextEditingController();
-  String? _selectedOption;
-  bool? _selectedAnswer; // For true/false questions
+  final Map<int, String?> _selectedOptions = {};
+  final Map<int, bool?> _selectedAnswers = {};
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,6 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            // List questions
             Expanded(
               child: ListView.builder(
                 itemCount: _questionService.questions.length,
@@ -42,14 +42,12 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                 },
               ),
             ),
-            // Add Question Button
             ElevatedButton(
               onPressed: () {
                 _showAddQuestionDialog(context);
               },
               child: Text('Add Question'),
             ),
-            // Practice Button
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -65,15 +63,20 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
     );
   }
 
-  // This will show the Add Question dialog
   void _showAddQuestionDialog(BuildContext context) {
-    _questionService.showAddQuestionDialog(context, _questionController, onAdd: (newQuestion) {
-      if (newQuestion != null) {
-        setState(() {
-          _questionService.addQuestion(newQuestion);
-        });
-      }
-    });
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => AddQuestionWidget(
+        onAdd: (newQuestion) {
+          if (newQuestion != null) {
+            setState(() {
+              _questionService.addQuestion(newQuestion);
+            });
+          }
+          Navigator.pop(context);
+        },
+      ),
+    );
   }
 
   Widget _buildQuestionWidget(Map<String, dynamic> question, int index) {
@@ -86,10 +89,10 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
               title: Text(option),
               leading: Radio<String>(
                 value: option,
-                groupValue: _selectedOption,
+                groupValue: _selectedOptions[index],
                 onChanged: (value) {
                   setState(() {
-                    _selectedOption = value;
+                    _selectedOptions[index] = value;
                   });
                 },
               ),
@@ -108,10 +111,10 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
               title: Text('True'),
               leading: Radio<bool>(
                 value: true,
-                groupValue: _selectedAnswer,
+                groupValue: _selectedAnswers[index],
                 onChanged: (value) {
                   setState(() {
-                    _selectedAnswer = value;
+                    _selectedAnswers[index] = value;
                   });
                 },
               ),
@@ -120,16 +123,89 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
               title: Text('False'),
               leading: Radio<bool>(
                 value: false,
-                groupValue: _selectedAnswer,
+                groupValue: _selectedAnswers[index],
                 onChanged: (value) {
                   setState(() {
-                    _selectedAnswer = value;
+                    _selectedAnswers[index] = value;
                   });
                 },
               ),
             ),
           ],
         );
+      case 'matching':
+        var options = (question['options'] as List<Map<String, String>>);
+        // Seçilen sağ seçeneklerin takibi
+        List<String?> _selectedRightOptions = List.filled(options.length, null);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: options.asMap().entries.map<Widget>((entry) {
+            int i = entry.key;
+            var option = entry.value;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Sol kutu
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        option['left']!,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 20), // Araya boşluk ekledik
+                  // Ok simgesi
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 24,
+                    color: Colors.blueAccent,
+                  ),
+                  SizedBox(width: 20), // Ok ile kutular arasında boşluk
+                  // Sağ kutu (Dropdown)
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButton<String>(
+                        hint: Text('Select'),
+                        isExpanded: true, // Dropdown genişliği genişletildi
+                        value: _selectedRightOptions[i],
+                        items: (question['options'] as List<Map<String, String>>)
+                            .where((opt) => !_selectedRightOptions.contains(opt['right']))
+                            .map<DropdownMenuItem<String>>((option) {
+                          return DropdownMenuItem<String>(
+                            value: option['right'],
+                            child: Text(option['right']!),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRightOptions[i] = value;  // Seçimi güncelledik
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        );
+
       default:
         return const Text('Unsupported question type');
     }
