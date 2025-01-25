@@ -24,7 +24,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFlashcards();
+    // _loadFlashcards();
   }
 
   void _swapWordMeaning() {
@@ -311,34 +311,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 _deleteFlashcard(flashcard, index);
                               },
                             ),
-                            // Add Swap button here
-                            IconButton(
-                              icon: Icon(Icons.swap_horiz, color: Colors.deepPurple),
-                              onPressed: () {
-                                setState(() {
-                                  String temp = flashcard.word;
-                                  flashcard.word = flashcard.meaning;
-                                  flashcard.meaning = temp;
-                                });
-
-                                // Update in Firebase as well
-                                FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(FirebaseAuth.instance.currentUser?.uid)
-                                    .collection('flashcard_groups')
-                                    .doc(widget.flashcardGroup.id)
-                                    .collection('flashcards')
-                                    .doc(flashcard.id)
-                                    .update({
-                                      'word': flashcard.word,
-                                      'meaning': flashcard.meaning,
-                                    })
-                                    .catchError((error) {
-                                  print('Error updating flashcard: $error');
-                                });
-                              },
-                            ),
-                          ],
+                          ],    
                         ),
                       ],
                     ),

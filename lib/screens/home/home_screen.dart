@@ -1,7 +1,6 @@
 import 'package:app/screens/lingva/lingva_screen.dart';
+import 'package:app/screens/quiz/quiz_list_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:app/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:app/screens/flashcard/flashcards_screen.dart';
 import 'package:app/screens/gemini/gemini_screen.dart';
 
@@ -17,13 +16,13 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             onPressed: () {
               // Sign out the user
-              context.read<SignInBloc>().add(const SignOutRequired());
+              // context.read<SignInBloc>().add(const SignOutRequired());
             },
             icon: const Icon(Icons.login),
           ),
           IconButton(
             onPressed: () {
-              showTranslateSheet(context); // Paneli açan fonksiyonu çağırıyoruz
+              showTranslateSheet(context); 
             },
             icon: const Icon(Icons.translate),
           ),
@@ -48,6 +47,15 @@ class HomeScreen extends StatelessWidget {
               );
             },
             child: const Text('Gemini'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => QuizListPage()), 
+              );
+            },
+            child: const Text('Quizzes'),
           ),
         ],
       ),

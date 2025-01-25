@@ -453,6 +453,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.2"
+  quiz_repo:
+    dependency: "direct main"
+    description:
+      path: "packages/quiz_package"
+      relative: true
+    source: path
+    version: "1.0.0+1"
   recase:
     dependency: transitive
     description:
