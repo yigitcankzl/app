@@ -11,13 +11,23 @@ class AddQuestionWidget extends StatelessWidget {
       length: 4,
       child: Column(
         children: [
-          TabBar(
-            tabs: [
-              Tab(text: 'Multiple Choice'),
-              Tab(text: 'True/False'),
-              Tab(text: 'Text Input'),
-              Tab(text: 'Matching'),
-            ],
+          // Improved TabBar design
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.blueGrey[50],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TabBar(
+              indicatorColor: Colors.blue,
+              labelColor: Colors.blue,
+              unselectedLabelColor: Colors.black,
+              tabs: [
+                Tab(text: 'Multiple Choice'),
+                Tab(text: 'True/False'),
+                Tab(text: 'Text Input'),
+                Tab(text: 'Matching'),
+              ],
+            ),
           ),
           Expanded(
             child: TabBarView(
@@ -53,63 +63,65 @@ class _MultipleChoiceFormState extends State<MultipleChoiceForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: questionController,
-            decoration: InputDecoration(labelText: 'Question'),
-          ),
-          TextField(
-            controller: optionAController,
-            decoration: InputDecoration(labelText: 'Option A'),
-          ),
-          TextField(
-            controller: optionBController,
-            decoration: InputDecoration(labelText: 'Option B'),
-          ),
-          TextField(
-            controller: optionCController,
-            decoration: InputDecoration(labelText: 'Option C'),
-          ),
-          TextField(
-            controller: optionDController,
-            decoration: InputDecoration(labelText: 'Option D'),
-          ),
-          DropdownButton<String>(
-            value: correctAnswer.isEmpty ? 'A' : correctAnswer,  // Default to 'A' if empty
-            hint: Text('Select Correct Answer'),
-            onChanged: (String? newValue) {
-              setState(() {
-                correctAnswer = newValue!;
-              });
-            },
-            items: ['A', 'B', 'C', 'D']
-                .map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              widget.onAdd({
-                'type': 'multiple_choice',
-                'question': questionController.text,
-                'options': {
-                  'A': optionAController.text,
-                  'B': optionBController.text,
-                  'C': optionCController.text,
-                  'D': optionDController.text,
-                },
-                'correct_answer': correctAnswer,
-              });
-            },
-            child: Text('Add Question'),
-          ),
-        ],
+    return SingleChildScrollView(  // Add this widget to enable scrolling
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: questionController,
+              decoration: InputDecoration(labelText: 'Question'),
+            ),
+            TextField(
+              controller: optionAController,
+              decoration: InputDecoration(labelText: 'Option A'),
+            ),
+            TextField(
+              controller: optionBController,
+              decoration: InputDecoration(labelText: 'Option B'),
+            ),
+            TextField(
+              controller: optionCController,
+              decoration: InputDecoration(labelText: 'Option C'),
+            ),
+            TextField(
+              controller: optionDController,
+              decoration: InputDecoration(labelText: 'Option D'),
+            ),
+            DropdownButton<String>(
+              value: correctAnswer.isEmpty ? 'A' : correctAnswer,  // Default to 'A' if empty
+              hint: Text('Select Correct Answer'),
+              onChanged: (String? newValue) {
+                setState(() {
+                  correctAnswer = newValue!;
+                });
+              },
+              items: ['A', 'B', 'C', 'D']
+                  .map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                widget.onAdd({
+                  'type': 'multiple_choice',
+                  'question': questionController.text,
+                  'options': {
+                    'A': optionAController.text,
+                    'B': optionBController.text,
+                    'C': optionCController.text,
+                    'D': optionDController.text,
+                  },
+                  'correct_answer': correctAnswer,
+                });
+              },
+              child: Text('Add Question'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -131,39 +143,24 @@ class _TrueFalseFormState extends State<TrueFalseForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           TextField(
             controller: questionController,
-            decoration: InputDecoration(labelText: 'Question'),
+            decoration: InputDecoration(
+              labelText: 'Question',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
           ),
+          SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    selectedAnswer = 'True';
-                  });
-                },
-                child: Text('True'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedAnswer == 'True' ? Colors.blue : Colors.grey,
-                ),
-              ),
-              SizedBox(width: 20),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    selectedAnswer = 'False';
-                  });
-                },
-                child: Text('False'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedAnswer == 'False' ? Colors.blue : Colors.grey,
-                ),
-              ),
+              _buildAnswerButton('True', selectedAnswer == 'True'),
+              SizedBox(width: 16),
+              _buildAnswerButton('False', selectedAnswer == 'False'),
             ],
           ),
           SizedBox(height: 20),
@@ -178,13 +175,31 @@ class _TrueFalseFormState extends State<TrueFalseForm> {
               }
             },
             child: Text('Add Question'),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12), backgroundColor: Colors.blue,
+              textStyle: TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),
     );
   }
-}
 
+  Widget _buildAnswerButton(String answer, bool isSelected) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          selectedAnswer = answer;
+        });
+      },
+      child: Text(answer),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? Colors.blue : Colors.grey,
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      ),
+    );
+  }
+}
 
 class TextInputForm extends StatefulWidget {
   final Function(Map<String, dynamic>?) onAdd;
@@ -201,17 +216,27 @@ class _TextInputFormState extends State<TextInputForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           TextField(
             controller: questionController,
-            decoration: InputDecoration(labelText: 'Question'),
+            decoration: InputDecoration(
+              labelText: 'Question',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
           ),
+          SizedBox(height: 16),
           TextField(
             controller: correctAnswerController,
-            decoration: InputDecoration(labelText: 'Correct Answer'),
+            decoration: InputDecoration(
+              labelText: 'Correct Answer',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
           ),
+          SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
               widget.onAdd({
@@ -221,6 +246,10 @@ class _TextInputFormState extends State<TextInputForm> {
               });
             },
             child: Text('Add Question'),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12), backgroundColor: Colors.blue,
+              textStyle: TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),
@@ -245,13 +274,18 @@ class _MatchingFormState extends State<MatchingForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           TextField(
             controller: questionController,
-            decoration: InputDecoration(labelText: 'Question'),
+            decoration: InputDecoration(
+              labelText: 'Question',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
           ),
+          SizedBox(height: 16),
           ListView.builder(
             shrinkWrap: true,
             itemCount: options.length,
@@ -266,6 +300,7 @@ class _MatchingFormState extends State<MatchingForm> {
                       decoration: InputDecoration(labelText: 'Left Option'),
                     ),
                   ),
+                  SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       onChanged: (value) {
@@ -286,7 +321,11 @@ class _MatchingFormState extends State<MatchingForm> {
               });
             },
             child: Text('Add Option'),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), backgroundColor: Colors.blue,
+            ),
           ),
+          SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
               widget.onAdd({
@@ -296,6 +335,10 @@ class _MatchingFormState extends State<MatchingForm> {
               });
             },
             child: Text('Add Question'),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12), backgroundColor: Colors.blue,
+              textStyle: TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),

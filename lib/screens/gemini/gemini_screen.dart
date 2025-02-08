@@ -1,6 +1,7 @@
 import 'package:app/screens/lingva/lingva_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_repo/gemini_package.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GeminiScreen extends StatefulWidget {
   const GeminiScreen({super.key});
@@ -12,6 +13,8 @@ class GeminiScreen extends StatefulWidget {
 class _GeminiScreenState extends State<GeminiScreen> {
   final TextEditingController _controller = TextEditingController();
   final GeminiService _geminiService = GeminiService();
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+
   List<Map<String, String>> _messages = [];
 
   void _sendMessage() async {
@@ -20,18 +23,21 @@ class _GeminiScreenState extends State<GeminiScreen> {
 
     setState(() {
       _messages.add({'sender': 'User', 'text': userInput});
+      _listKey.currentState?.insertItem(_messages.length - 1);
     });
     _controller.clear();
-    FocusScope.of(context).unfocus(); // Klavyeyi kapat
+    FocusScope.of(context).unfocus();
 
     try {
       String result = await _geminiService.sendMessage(userInput);
       setState(() {
         _messages.add({'sender': 'Gemini', 'text': result});
+        _listKey.currentState?.insertItem(_messages.length - 1);
       });
     } catch (e) {
       setState(() {
         _messages.add({'sender': 'Gemini', 'text': "Hata oluştu: $e"});
+        _listKey.currentState?.insertItem(_messages.length - 1);
       });
     }
   }
@@ -40,8 +46,14 @@ class _GeminiScreenState extends State<GeminiScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gemini Chat'),
-        actions: [          
+      title: Text(
+        'Gemini Chat',
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.w500,
+          fontSize: 18, 
+          color: Colors.white,
+        ),
+),        actions: [
           IconButton(
             onPressed: () {
               showTranslateSheet(context);
@@ -51,43 +63,50 @@ class _GeminiScreenState extends State<GeminiScreen> {
         ],
         backgroundColor: Colors.deepPurple,
         centerTitle: true,
+        elevation: 4,
+        shadowColor: Colors.black.withOpacity(0.2),
       ),
       body: Container(
-        color: Colors.grey[200], // Arkaplan rengi
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF2F2F2), Color(0xFFE0E0E0)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(8.0),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
+              child: AnimatedList(
+                key: _listKey,
+                padding: const EdgeInsets.all(10),
+                initialItemCount: _messages.length,
+                itemBuilder: (context, index, animation) {
                   bool isUser = _messages[index]['sender'] == 'User';
-                  return Align(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
-                      padding: const EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: isUser ? Colors.deepPurple : Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(20),
-                          topRight: const Radius.circular(20),
-                          bottomLeft: isUser ? const Radius.circular(20) : Radius.zero,
-                          bottomRight: isUser ? Radius.zero : const Radius.circular(20),
+                  return SizeTransition(
+                    sizeFactor: animation,
+                    child: Align(
+                      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: isUser ? Colors.deepPurple : Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              spreadRadius: 1,
+                              blurRadius: 6,
+                            ),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 5,
+                        child: Text(
+                          _messages[index]['text']!,
+                          style: GoogleFonts.poppins(
+                            color: isUser ? Colors.white : Colors.black87,
+                            fontSize: 16,
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        _messages[index]['text']!,
-                        style: TextStyle(
-                          color: isUser ? Colors.white : Colors.black87,
-                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -96,36 +115,39 @@ class _GeminiScreenState extends State<GeminiScreen> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.grey.shade300)),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _controller,
+                      style: GoogleFonts.poppins(),
                       decoration: InputDecoration(
                         hintText: 'Talk with AI...',
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
+                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade500),
+                        border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  CircleAvatar(
+                  FloatingActionButton(
                     backgroundColor: Colors.deepPurple,
-                    radius: 25,
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white),
-                      onPressed: _sendMessage,
-                    ),
+                    elevation: 5,
+                    onPressed: _sendMessage,
+                    child: const Icon(Icons.send, color: Colors.white),
                   ),
                 ],
               ),

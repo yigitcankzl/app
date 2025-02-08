@@ -22,7 +22,7 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.quizTitle)),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Expanded(
@@ -31,10 +31,17 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                 itemBuilder: (context, index) {
                   var question = _questionService.questions[index];
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Card(
+                      elevation: 4,
                       child: ListTile(
-                        title: Text(question['question'] as String),
+                        title: Text(
+                          question['question'] as String,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         subtitle: _buildQuestionWidget(question, index),
                       ),
                     ),
@@ -42,20 +49,53 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                 },
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                _showAddQuestionDialog(context);
-              },
-              child: Text('Add Question'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PracticePage()),
-                );
-              },
-              child: Text('Practice'),
+            SizedBox(height: 20), // Added spacing between buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Add Question Button
+                ElevatedButton(
+                  onPressed: () {
+                    _showAddQuestionDialog(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    backgroundColor: Colors.blueAccent, // Button color
+                    shadowColor: Colors.blue.shade700, // Shadow color
+                    elevation: 8, // Elevation for shadow
+                  ),
+                  child: Text(
+                    'Add Question',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+                SizedBox(width: 20), // Space between buttons
+                // Practice Button
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PracticePage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    backgroundColor: Colors.greenAccent, // Button color
+                    shadowColor: Colors.green.shade700, // Shadow color
+                    elevation: 8, // Elevation for shadow
+                  ),
+                  child: Text(
+                    'Practice',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -135,7 +175,6 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
         );
       case 'matching':
         var options = (question['options'] as List<Map<String, String>>);
-        // Seçilen sağ seçeneklerin takibi
         List<String?> _selectedRightOptions = List.filled(options.length, null);
 
         return Column(
@@ -149,7 +188,7 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Sol kutu
+                  // Left box
                   Expanded(
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -164,15 +203,14 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 20), // Araya boşluk ekledik
-                  // Ok simgesi
+                  SizedBox(width: 20),
                   Icon(
                     Icons.arrow_forward,
                     size: 24,
                     color: Colors.blueAccent,
                   ),
-                  SizedBox(width: 20), // Ok ile kutular arasında boşluk
-                  // Sağ kutu (Dropdown)
+                  SizedBox(width: 20),
+                  // Right box (Dropdown)
                   Expanded(
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -182,9 +220,9 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                       ),
                       child: DropdownButton<String>(
                         hint: Text('Select'),
-                        isExpanded: true, // Dropdown genişliği genişletildi
+                        isExpanded: true,
                         value: _selectedRightOptions[i],
-                        items: (question['options'] as List<Map<String, String>>)
+                        items: options
                             .where((opt) => !_selectedRightOptions.contains(opt['right']))
                             .map<DropdownMenuItem<String>>((option) {
                           return DropdownMenuItem<String>(
@@ -194,7 +232,7 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                         }).toList(),
                         onChanged: (value) {
                           setState(() {
-                            _selectedRightOptions[i] = value;  // Seçimi güncelledik
+                            _selectedRightOptions[i] = value;
                           });
                         },
                       ),
@@ -205,7 +243,6 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
             );
           }).toList(),
         );
-
       default:
         return const Text('Unsupported question type');
     }

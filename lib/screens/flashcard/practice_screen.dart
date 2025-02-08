@@ -15,7 +15,6 @@ class PracticeScreen extends StatefulWidget {
   @override
   _PracticeScreenState createState() => _PracticeScreenState();
 }
-
 class _PracticeScreenState extends State<PracticeScreen> {
   int currentIndex = 0;
   bool isFront = true;
@@ -27,16 +26,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
     _shuffleFlashcards();
   }
 
-
   void _shuffleFlashcards() {
     setState(() {
       List<Flashcard> weightedFlashcards = [];
 
       for (var flashcard in widget.flashcardGroup.flashcards) {
         if (flashcard.isFavorite) {
-          weightedFlashcards.addAll(List.generate(2, (_) => flashcard));  
+          weightedFlashcards.addAll(List.generate(2, (_) => flashcard));
         } else {
-          weightedFlashcards.add(flashcard); 
+          weightedFlashcards.add(flashcard);
         }
       }
 
@@ -44,7 +42,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
       widget.flashcardGroup.flashcards = weightedFlashcards;
     });
   }
-
 
   void _updateFlashcardInGroup(Flashcard updatedFlashcard) async {
     setState(() {
@@ -106,10 +103,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              showTranslateSheet(context); 
+              showTranslateSheet(context);
             },
             icon: const Icon(Icons.translate),
-          ),],
+          ),
+        ],
         backgroundColor: Colors.deepPurple,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -142,7 +140,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   onPressed: () {
                     setState(() {
                       if (currentIndex > 0) {
-                        currentIndex--; 
+                        currentIndex--;
                         isFront = true;
                       }
                     });
@@ -161,8 +159,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   onPressed: () {
                     setState(() {
                       if (currentIndex < widget.flashcardGroup.flashcards.length - 1) {
-                        currentIndex++; 
-                        isFront = true; 
+                        currentIndex++;
+                        isFront = true;
                       } else {
                         Navigator.push(
                           context,
@@ -171,7 +169,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                               flashcardGroup: widget.flashcardGroup,
                             ),
                           ),
-                        ); 
+                        );
                       }
                     });
                   },
@@ -190,68 +188,58 @@ class _PracticeScreenState extends State<PracticeScreen> {
                       isFront = !isFront;
                     });
                   },
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: 250,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.deepPurple, Colors.purpleAccent],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              spreadRadius: 4,
-                              blurRadius: 10,
-                              offset: Offset(0, 5),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    width: double.infinity,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      gradient: isFront
+                          ? LinearGradient(
+                              colors: [Colors.deepPurple, Colors.purpleAccent],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : LinearGradient(
+                              colors: [Colors.teal, Colors.cyan],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                          ],
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          spreadRadius: 4,
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
                         ),
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              isFront ? currentFlashcard.word : currentFlashcard.meaning,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.edit,
+                      ],
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          isFront ? currentFlashcard.word : currentFlashcard.meaning,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
-                          onPressed: () {
-                            _showEditFlashcardDialog(currentFlashcard);
-                          },
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),  
+            ),
             Column(
               children: [
                 SizedBox(height: 8),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: currentFlashcard.status == 'memorized' 
-                        ? Colors.green 
-                        : Colors.red, 
+                    backgroundColor: currentFlashcard.status == 'memorized'
+                        ? Colors.green
+                        : Colors.red,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -266,9 +254,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
                     _updateFlashcardStatus(currentFlashcard);
                   },
                   child: Text(
-                    currentFlashcard.status == 'memorized' 
-                        ? 'MEMORIZED' 
-                        : 'NOT MEMORIZED', 
+                    currentFlashcard.status == 'memorized'
+                        ? 'MEMORIZED'
+                        : 'NOT MEMORIZED',
                   ),
                 ),
               ],
@@ -339,5 +327,4 @@ class _PracticeScreenState extends State<PracticeScreen> {
       },
     );
   }
-
 }

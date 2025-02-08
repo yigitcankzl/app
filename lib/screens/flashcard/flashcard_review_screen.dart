@@ -77,7 +77,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               word: doc['word'],
               meaning: doc['meaning'],
               status: doc['status'],
-              isFavorite: doc['isFavorite'], // Fetch the isFavorite status
+              isFavorite: doc['isFavorite'],
             ),
           );
         }
@@ -91,7 +91,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
       print('User is not logged in');
     }
   }
-
 
   void _deleteFlashcard(Flashcard flashcard, int index) {
     setState(() {
@@ -129,7 +128,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
     });
   }
 
-
   void _showEditDialog(Flashcard flashcard, int index) {
     final _wordController = TextEditingController(text: flashcard.word);
     final _meaningController = TextEditingController(text: flashcard.meaning);
@@ -138,8 +136,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.deepPurple[100],
-          title: Text('Edit Flashcard', style: TextStyle(color: Colors.deepPurple[900])),
+          backgroundColor: Colors.deepPurple[50],
+          title: Text('Edit Flashcard', style: TextStyle(color: Colors.deepPurple[900], fontWeight: FontWeight.bold)),
           content: Form(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -149,13 +147,20 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   decoration: InputDecoration(
                     labelText: 'Word',
                     labelStyle: TextStyle(color: Colors.deepPurple[800]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
+                SizedBox(height: 16),
                 TextFormField(
                   controller: _meaningController,
                   decoration: InputDecoration(
                     labelText: 'Meaning',
                     labelStyle: TextStyle(color: Colors.deepPurple[800]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ],
@@ -169,7 +174,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
               child: Text('Cancel', style: TextStyle(color: Colors.deepPurple[900])),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   flashcard.word = _wordController.text.trim();
@@ -218,38 +228,36 @@ class _ReviewScreenState extends State<ReviewScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
+        elevation: 0,
+        title: Text(
+          '${widget.flashcardGroup.name} Review',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
             onPressed: () {
-              showTranslateSheet(context); 
+              showTranslateSheet(context);
             },
-            icon: const Icon(Icons.translate),
+            icon: const Icon(Icons.translate, color: Colors.white),
           ),
         ],
-        title: Text(
-          '${widget.flashcardGroup.name} Review',
-          style: TextStyle(color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => FlashcardsScreen()),
-            );
-          },
-        ),
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text('Total: ${widget.flashcardGroup.flashcards.length}'),
-                Text('Memorized: ${widget.flashcardGroup.flashcards.where((card) => card.status == 'memorized').length}'),
-                Text('Not Memorized: ${widget.flashcardGroup.flashcards.where((card) => card.status == 'not memorized').length}'),
+                _buildStatCard('Total', widget.flashcardGroup.flashcards.length.toString(), Colors.deepPurple),
+                _buildStatCard('Memorized', widget.flashcardGroup.flashcards.where((card) => card.status == 'memorized').length.toString(), Colors.green),
+                _buildStatCard('Not Memorized', widget.flashcardGroup.flashcards.where((card) => card.status == 'not memorized').length.toString(), Colors.red),
               ],
             ),
           ),
@@ -261,8 +269,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 Color statusColor = flashcard.status == 'memorized' ? Colors.green : Colors.red;
 
                 return Card(
-                  color: Colors.deepPurple[50],
-                  margin: EdgeInsets.all(8),
+                  elevation: 2,
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -270,48 +281,45 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         Container(
                           width: 8,
                           height: 60,
-                          color: statusColor,
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
-                        SizedBox(width: 10),
-
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              flashcard.word,
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple[900]),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              flashcard.meaning,
-                              style: TextStyle(fontSize: 16, color: Colors.deepPurple[700]),
-                            ),
-                          ],
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                flashcard.word,
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple[900]),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                flashcard.meaning,
+                                style: TextStyle(fontSize: 16, color: Colors.deepPurple[700]),
+                              ),
+                            ],
+                          ),
                         ),
-
-                        Spacer(),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              icon: Icon(flashcard.isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.deepPurple),
-                              onPressed: () {
-                                _toggleFavorite(flashcard, index);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.edit, color: Colors.deepPurple),
-                              onPressed: () {
-                                _showEditDialog(flashcard, index);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.deepPurple),
-                              onPressed: () {
-                                _deleteFlashcard(flashcard, index);
-                              },
-                            ),
-                          ],    
+                        IconButton(
+                          icon: Icon(flashcard.isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.deepPurple),
+                          onPressed: () {
+                            _toggleFavorite(flashcard, index);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.deepPurple),
+                          onPressed: () {
+                            _showEditDialog(flashcard, index);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.deepPurple),
+                          onPressed: () {
+                            _deleteFlashcard(flashcard, index);
+                          },
                         ),
                       ],
                     ),
@@ -320,44 +328,77 @@ class _ReviewScreenState extends State<ReviewScreen> {
               },
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AddCardDialog(
-                          flashcardGroup: widget.flashcardGroup,
-                          onFlashcardAdded: () {
-                            setState(() {
-                              _loadFlashcards(); // Reload flashcards from Firebase
-                            });
-                          },
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Add Card', style: TextStyle(color: Colors.white)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-                  onPressed: _startPractice,
-                  child: Text('Practice', style: TextStyle(color: Colors.white)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-                  onPressed: _swapWordMeaning, // Add the swap button
-                  child: Text('Swap Word/Meaning', style: TextStyle(color: Colors.white)),
-                ),
+                _buildActionButton('Add Card', Icons.add, Colors.deepPurple, () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AddCardDialog(
+                        flashcardGroup: widget.flashcardGroup,
+                        onFlashcardAdded: () {
+                          setState(() {
+                            _loadFlashcards();
+                          });
+                        },
+                      );
+                    },
+                  );
+                }),
+                _buildActionButton('Practice', Icons.play_arrow, Colors.deepPurple, _startPractice),
+                _buildActionButton('Swap', Icons.swap_horiz, Colors.deepPurple, _swapWordMeaning),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, Color color) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            ),
+            SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String text, IconData icon, Color color, VoidCallback onPressed) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white),
+          SizedBox(width: 8),
+          Text(text, style: TextStyle(color: Colors.white)),
         ],
       ),
     );

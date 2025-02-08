@@ -26,18 +26,26 @@ class _QuizListPageState extends State<QuizListPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Quiz Title'),
+                decoration: const InputDecoration(
+                  labelText: 'Quiz Title',
+                  prefixIcon: Icon(Icons.title),
+                ),
               ),
-              TextField(
+              SizedBox(height: 16.0),
+              TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Quiz Description'),
+                decoration: const InputDecoration(
+                  labelText: 'Quiz Description',
+                  prefixIcon: Icon(Icons.description),
+                ),
               ),
+              SizedBox(height: 20.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () {
                       QuizListService.addQuiz(
                         _titleController.text,
@@ -47,13 +55,15 @@ class _QuizListPageState extends State<QuizListPage> {
                       Navigator.pop(context);
                       setState(() {});
                     },
-                    child: const Text('Add Your Own'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Your Own'),
                   ),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () {
-                      //ai sayfasina gidecek
+                      // Navigate to AI page
                     },
-                    child: const Text('Add with ai'),
+                    icon: const Icon(Icons.computer),
+                    label: const Text('Add with AI'),
                   ),
                 ],
               ),
@@ -76,18 +86,25 @@ class _QuizListPageState extends State<QuizListPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Quiz Title'),
+                decoration: const InputDecoration(
+                  labelText: 'Quiz Title',
+                  prefixIcon: Icon(Icons.title),
+                ),
               ),
-              TextField(
+              SizedBox(height: 16.0),
+              TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Quiz Description'),
+                decoration: const InputDecoration(
+                  labelText: 'Quiz Description',
+                  prefixIcon: Icon(Icons.description),
+                ),
               ),
             ],
           ),
           actions: [
-            TextButton(
+            TextButton.icon(
               onPressed: () {
                 QuizListService.updateQuiz(
                   index,
@@ -98,13 +115,15 @@ class _QuizListPageState extends State<QuizListPage> {
                 Navigator.pop(context);
                 setState(() {});
               },
-              child: const Text('Update'),
+              icon: const Icon(Icons.check),
+              label: const Text('Update'),
             ),
-            TextButton(
+            TextButton.icon(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancel'),
+              icon: const Icon(Icons.cancel),
+              label: const Text('Cancel'),
             ),
           ],
         );
@@ -120,19 +139,21 @@ class _QuizListPageState extends State<QuizListPage> {
           title: const Text('Delete Quiz'),
           content: const Text('Are you sure you want to delete this quiz?'),
           actions: [
-            TextButton(
+            TextButton.icon(
               onPressed: () {
                 QuizListService.deleteQuiz(index, context);
                 Navigator.pop(context);
                 setState(() {});
               },
-              child: const Text('Yes'),
+              icon: const Icon(Icons.delete_forever),
+              label: const Text('Yes'),
             ),
-            TextButton(
+            TextButton.icon(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('No'),
+              icon: const Icon(Icons.cancel),
+              label: const Text('No'),
             ),
           ],
         );
@@ -147,33 +168,43 @@ class _QuizListPageState extends State<QuizListPage> {
       body: ListView.builder(
         itemCount: QuizListService.quizzes.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(QuizListService.quizzes[index]['title']!),
-            subtitle: Text(QuizListService.quizzes[index]['description']!),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => QuizQuestionPage(quizTitle: QuizListService.quizzes[index]['title']!),
-                ),
-              );
-            },
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    _showEditQuizDialog(index);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    _showDeleteQuizDialog(index);
-                  },
-                ),
-              ],
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            elevation: 5.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: ListTile(
+              title: Text(
+                QuizListService.quizzes[index]['title']!,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(QuizListService.quizzes[index]['description']!),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizQuestionPage(quizTitle: QuizListService.quizzes[index]['title']!),
+                  ),
+                );
+              },
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _showEditQuizDialog(index);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _showDeleteQuizDialog(index);
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
